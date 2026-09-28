@@ -1,13 +1,14 @@
-#Structured logging: what production actually looks at
+# Structured logging: what production actually looks at
 
-#Print statements disappear the moment your terminal closes. In production, logs are how you debug a pipeline that ran unattended at 3am and failed.
+# Print statements disappear the moment your terminal closes. In production, logs are how you debug a pipeline that ran unattended at 3am and failed.
 
 import logging
 import sys
 import json
 from datetime import datetime, timezone
 
-def setup_logging(level: str ="INFO") -> logging.Logger:
+
+def setup_logging(level: str = "INFO") -> logging.Logger:
     """
     Configure logging once at pipeline startup.
     Every module imports logging.getLogger(__name__) and inherits this config.
@@ -16,7 +17,7 @@ def setup_logging(level: str ="INFO") -> logging.Logger:
     logger.setLevel(getattr(logging, level))
     
     if logger.handlers:
-        #guard against duplicate handles if this is called twice
+        # Guard against duplicate handles if this is called twice
         # (happens easily in notebooks or whem a module is re-imported)
         return logger
     
