@@ -1,4 +1,4 @@
-# Structured logging: what production actually looks at
+# Structured logging: what production actually looks at 
 
 # Print statements disappear the moment your terminal closes. In production, logs are how you debug a pipeline that ran unattended at 3am and failed.
 
