@@ -15,16 +15,16 @@ class DataLoader:
     """_summary_
     Downloads data from a live source, caches locally and tracks
     exactly which version od the data was used for every run
-    
+
     WHY CACHE? In production you do no want every pipeline run to re-hit
     an external API or data lake -  it is slow, costs money on metered APIs,
     and if source goes down your pipeline still needds to run on the last known- good data
-    
+
     WHY HASH? "Which dataset produced this model?" is on of the most
     common questions in production ML debugginh. A content hash answers it precisely
     - if the hash matches, it is provably the same data
     """
-    
+
     def __init__(self, settings: Settings):
         self.settings = settings  # Store the Settings object inside the loader so every method can access config.
         #settings → DataLoader → self.settings
@@ -34,7 +34,7 @@ class DataLoader:
         #Turn the URL into a short, deterministic fingerprint.
         return self.settings.raw_data_dir / f"raw_{url_hash}.csv"
         # Take the raw-data folder + create the filename raw_<hash>.csv and return that path
-        
+
 #self.settings.raw_data_dir
 #       ↓
 #data/raw/
@@ -51,7 +51,7 @@ class DataLoader:
         """_summary_
 
         Load data. Uses local cache unless force_refresh = True or cache missing
-        
+
         Args:
             force_refresh (bool, optional): _description_. Defaults to False.
 
@@ -59,11 +59,11 @@ class DataLoader:
             pd.DataFrame: _description_
         """
         cache_path = self._cache_path(self.settings.data_url)
-        
+
         if cache_path.exists() and not force_refresh:
             logger.info(f"Loading from cache: {cache_path}")
             df = pd.read_csv(cache_path)
-        
+
         else:
             logger.info(f"Downloading from source {self.settings.data_url}")
             df = self._download()
@@ -71,12 +71,12 @@ class DataLoader:
             logger.info(f"Cached to: {cache_path}")
         content_hash = self._compute_hash(df)
         logger.info(f"Dataset hash: {content_hash} | shape: {df.shape}")
-        
+
         self._write_manifest(df, content_hash, cache_path)
-        
+
         return df
 
-    
+
     def _download(self) -> pd.DataFrame:
         """
         Download with retries and a real timeout — production APIs and
@@ -113,7 +113,7 @@ class DataLoader:
         # regardless of download timestamp or file metadata.
         content = pd.util.hash_pandas_object(df, index=True).values
         return hashlib.sha256(content.tobytes()).hexdigest()[:16]
-    
+
     def _write_manifest(self, df: pd.DataFrame, content_hash: str, cache_path: Path):
         """
         A manifest file records exactly what data was used, when.
@@ -134,9 +134,7 @@ class DataLoader:
             json.dump(manifest, file, indent=2)
         logger.info(f"Manifest written: {manifest_path}")
 
-
-if __name__ == "__main__":
-    loader = DataLoader(settings)
-    df = loader.load()
-    print(df.shape)
-    print(df.dtypes)
+loader = DataLoader(settings)
+df = loader.load()
+print(df.shape)
+print(df.dtypes)
